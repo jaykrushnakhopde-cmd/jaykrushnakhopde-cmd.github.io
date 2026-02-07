@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Content Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .class-selector {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .class-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            background: #f0f0f0;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .class-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .class-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .subject-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .subject-card.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .sst-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .sst-section {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            border: 2px solid #667eea;
+        }
+
+        .sst-section:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .sst-section.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .chapters-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .chapter-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .chapter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .chapter-header h3 {
+            color: #333;
+            flex: 1;
+        }
+
+        .chapter-content {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chapter-content.show {
+            display: block;
+        }
+
+        .content-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.show {
+            display: block;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-area:hover {
+            background: #e9ecef;
+            border-color: #764ba2;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .uploaded-files {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .file-icon {
+            font-size: 2em;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .view-btn:hover {
+            background: #764ba2;
+        }
+
+        .remove-file-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .remove-file-btn:hover {
+            background: #c82333;
+        }
+
+        .no-files {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 2% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-modal {
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .close-modal:hover {
+            opacity: 0.8;
+        }
+
+        .modal-body {
+            height: calc(100% - 70px);
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .modal-body iframe,
+        .modal-body img,
+        .modal-body video {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .download-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+        }
+
+        .download-link:hover {
+            background: #764ba2;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .add-chapter-form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .add-chapter-form input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 15px;
+        }
+
+        .add-chapter-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: none;
+            animation: fadeInOut 2s;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .breadcrumb {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .breadcrumb span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="save-indicator" id="saveIndicator">✓ Auto-saved</div>
+    
+    <!-- File Viewer Modal -->
+    <div id="fileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">File Viewer</h2>
+                <button class="close-modal" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>📚 Educational Content Manager</h1>
+            <p>Organize your study materials efficiently</p>
+        </div>
+
+        <div class="content">
+            <div id="mainView">
+                <div class="class-selector">
+                    <button class="class-btn" onclick="selectClass(9)">Class 9th</button>
+                    <button class="class-btn" onclick="selectClass(10)">Class 10th</button>
+                </div>
+
+                <div id="subjectsView" style="display: none;">
+                    <div class="breadcrumb">
+                        <strong>Current Selection:</strong> <span id="breadcrumbText"></span>
+                    </div>
+                    
+                    <button class="back-btn" onclick="goBack()">← Back to Class Selection</button>
+                    
+                    <div id="sstSectionsView" style="display: none;">
+                        <h2 style="margin-bottom: 15px;">Select SST Section</h2>
+                        <div class="sst-sections">
+                            <div class="sst-section" onclick="selectSSTSection('history')">
+                                📜 History
+                            </div>
+                            <div class="sst-section" onclick="selectSSTSection('political-science')">
+                                🏛️ Political Science
+                            </div>
+                            <div class="sst-section" onclick="selectSSTSection('geography')">
+                                🌍 Geography
+                            </div>
+                            <div class="sst-section" onclick="selectSSTSection('economics')">
+                                💰 Economics
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subjects-grid" id="subjectsGrid">
+                        <div class="subject-card" onclick="selectSubject('science')">🔬 Science</div>
+                        <div class="subject-card" onclick="selectSubject('maths')">➗ Maths</div>
+                        <div class="subject-card" onclick="selectSubject('sst')">🌏 SST</div>
+                        <div class="subject-card" onclick="selectSubject('english')">📖 English</div>
+                        <div class="subject-card" onclick="selectSubject('hindi')">🇮🇳 Hindi</div>
+                        <div class="subject-card" onclick="selectSubject('marathi')">🔤 Marathi</div>
+                        <div class="subject-card" onclick="selectSubject('sanskrit')">🕉️ Sanskrit</div>
+                        <div class="subject-card" onclick="selectSubject('it')">💻 IT</div>
+                    </div>
+                </div>
+
+                <div id="chaptersView" style="display: none;">
+                    <div class="breadcrumb">
+                        <strong>Current Path:</strong> <span id="chapterBreadcrumb"></span>
+                    </div>
+                    
+                    <button class="back-btn" onclick="backToSubjects()">← Back to Subjects</button>
+
+                    <div class="add-chapter-form">
+                        <h3 style="margin-bottom: 15px;">Add New Chapter</h3>
+                        <input type="text" id="chapterName" placeholder="Enter chapter name">
+                        <button class="btn btn-primary" onclick="addChapter()">Add Chapter</button>
+                    </div>
+
+                    <div class="chapters-section" id="chaptersList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentClass = null;
+        let currentSubject = null;
+        let currentSSTSection = null;
+        let data = {
+            class9: {},
+            class10: {}
+        };
+
+        // Load data from localStorage on page load
+        function loadData() {
+            const saved = localStorage.getItem('educationData');
+            if (saved) {
+                data = JSON.parse(saved);
+            }
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('educationData', JSON.stringify(data));
+            showSaveIndicator();
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        function selectClass(classNum) {
+            currentClass = classNum;
+            currentSubject = null;
+            currentSSTSection = null;
+            
+            document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('subjectsView').style.display = 'block';
+            document.getElementById('chaptersView').style.display = 'none';
+            document.getElementById('sstSectionsView').style.display = 'none';
+            document.getElementById('breadcrumbText').textContent = `Class ${classNum}`;
+        }
+
+        function selectSubject(subject) {
+            if (subject === 'sst') {
+                document.getElementById('sstSectionsView').style.display = 'block';
+                document.getElementById('subjectsGrid').style.display = 'none';
+                currentSubject = 'sst';
+            } else {
+                currentSubject = subject;
+                currentSSTSection = null;
+                showChapters();
+            }
+        }
+
+        function selectSSTSection(section) {
+            currentSSTSection = section;
+            showChapters();
+        }
+
+        function showChapters() {
+            document.getElementById('subjectsView').style.display = 'none';
+            document.getElementById('chaptersView').style.display = 'block';
+            
+            let path = `Class ${currentClass} > ${currentSubject.toUpperCase()}`;
+            if (currentSSTSection) {
+                path += ` > ${currentSSTSection.replace('-', ' ').toUpperCase()}`;
+            }
+            document.getElementById('chapterBreadcrumb').textContent = path;
+            
+            renderChapters();
+        }
+
+        function getDataPath() {
+            const classKey = `class${currentClass}`;
+            if (!data[classKey][currentSubject]) {
+                data[classKey][currentSubject] = {};
+            }
+            
+            if (currentSSTSection) {
+                if (!data[classKey][currentSubject][currentSSTSection]) {
+                    data[classKey][currentSubject][currentSSTSection] = { chapters: [] };
+                }
+                return data[classKey][currentSubject][currentSSTSection];
+            } else {
+                if (!data[classKey][currentSubject].chapters) {
+                    data[classKey][currentSubject] = { chapters: [] };
+                }
+                return data[classKey][currentSubject];
+            }
+        }
+
+        function addChapter() {
+            const chapterName = document.getElementById('chapterName').value.trim();
+            if (!chapterName) {
+                alert('Please enter a chapter name');
+                return;
+            }
+            
+            const dataPath = getDataPath();
+            dataPath.chapters.push({
+                name: chapterName,
+                notes: [],
+                textbookAnswers: [],
+                practiceProblems: []
+            });
+            
+            document.getElementById('chapterName').value = '';
+            saveData();
+            renderChapters();
+        }
+
+        function renderChapters() {
+            const dataPath = getDataPath();
+            const chaptersList = document.getElementById('chaptersList');
+            
+            if (!dataPath.chapters || dataPath.chapters.length === 0) {
+                chaptersList.innerHTML = '<p style="text-align: center; color: #666;">No chapters added yet. Add your first chapter above!</p>';
+                return;
+            }
+            
+            chaptersList.innerHTML = dataPath.chapters.map((chapter, index) => `
+                <div class="chapter-item">
+                    <div class="chapter-header" onclick="toggleChapter(${index})">
+                        <h3>${index + 1}. ${chapter.name}</h3>
+                        <button class="delete-btn" onclick="deleteChapter(event, ${index})">Delete</button>
+                    </div>
+                    <div class="chapter-content" id="chapter-${index}">
+                        <div class="content-tabs">
+                            <button class="tab-btn active" onclick="switchTab(${index}, 'notes')">📝 Notes</button>
+                            <button class="tab-btn" onclick="switchTab(${index}, 'answers')">✅ Textbook Answers</button>
+                            <button class="tab-btn" onclick="switchTab(${index}, 'practice')">📚 Practice Problems</button>
+                        </div>
+                        
+                        <div class="tab-content show" id="notes-${index}">
+                            <div class="file-upload-area" onclick="document.getElementById('file-notes-${index}').click()">
+                                <div class="upload-icon">📁</div>
+                                <h3>Click to Upload Notes Files</h3>
+                                <p>PDF, Word, Images, Videos, or any document</p>
+                                <input type="file" id="file-notes-${index}" multiple 
+                                    onchange="handleFileUpload(event, ${index}, 'notes')">
+                            </div>
+                            <div class="uploaded-files" id="files-notes-${index}">
+                                ${renderFiles(chapter.notes, index, 'notes')}
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="answers-${index}">
+                            <div class="file-upload-area" onclick="document.getElementById('file-answers-${index}').click()">
+                                <div class="upload-icon">📁</div>
+                                <h3>Click to Upload Textbook Answer Files</h3>
+                                <p>PDF, Word, Images, Videos, or any document</p>
+                                <input type="file" id="file-answers-${index}" multiple 
+                                    onchange="handleFileUpload(event, ${index}, 'textbookAnswers')">
+                            </div>
+                            <div class="uploaded-files" id="files-answers-${index}">
+                                ${renderFiles(chapter.textbookAnswers, index, 'textbookAnswers')}
+                            </div>
+                        </div>
+                        
+                        <div class="tab-content" id="practice-${index}">
+                            <div class="file-upload-area" onclick="document.getElementById('file-practice-${index}').click()">
+                                <div class="upload-icon">📁</div>
+                                <h3>Click to Upload Practice Problem Files</h3>
+                                <p>PDF, Word, Images, Videos, or any document</p>
+                                <input type="file" id="file-practice-${index}" multiple 
+                                    onchange="handleFileUpload(event, ${index}, 'practiceProblems')">
+                            </div>
+                            <div class="uploaded-files" id="files-practice-${index}">
+                                ${renderFiles(chapter.practiceProblems, index, 'practiceProblems')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleChapter(index) {
+            const content = document.getElementById(`chapter-${index}`);
+            content.classList.toggle('show');
+        }
+
+        function switchTab(chapterIndex, tab) {
+            const chapterContent = document.getElementById(`chapter-${chapterIndex}`);
+            const tabs = chapterContent.querySelectorAll('.tab-btn');
+            const contents = chapterContent.querySelectorAll('.tab-content');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('show'));
+            
+            event.target.classList.add('active');
+            
+            if (tab === 'notes') {
+                document.getElementById(`notes-${chapterIndex}`).classList.add('show');
+            } else if (tab === 'answers') {
+                document.getElementById(`answers-${chapterIndex}`).classList.add('show');
+            } else if (tab === 'practice') {
+                document.getElementById(`practice-${chapterIndex}`).classList.add('show');
+            }
+        }
+
+        function saveContent(chapterIndex, field, value) {
+            const dataPath = getDataPath();
+            dataPath.chapters[chapterIndex][field] = value;
+            saveData();
+        }
+
+        function getFileIcon(fileName) {
+            const ext = fileName.split('.').pop().toLowerCase();
+            const iconMap = {
+                'pdf': '📄',
+                'doc': '📝',
+                'docx': '📝',
+                'xls': '📊',
+                'xlsx': '📊',
+                'ppt': '📊',
+                'pptx': '📊',
+                'jpg': '🖼️',
+                'jpeg': '🖼️',
+                'png': '🖼️',
+                'gif': '🖼️',
+                'mp4': '🎥',
+                'avi': '🎥',
+                'mov': '🎥',
+                'mp3': '🎵',
+                'wav': '🎵',
+                'txt': '📃',
+                'zip': '📦',
+                'rar': '📦'
+            };
+            return iconMap[ext] || '📎';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        async function handleFileUpload(event, chapterIndex, field) {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            const dataPath = getDataPath();
+            if (!Array.isArray(dataPath.chapters[chapterIndex][field])) {
+                dataPath.chapters[chapterIndex][field] = [];
+            }
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    dataPath.chapters[chapterIndex][field].push({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        data: e.target.result,
+                        uploadDate: new Date().toISOString()
+                    });
+                    saveData();
+                    renderChapters();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function renderFiles(files, chapterIndex, field) {
+            if (!Array.isArray(files) || files.length === 0) {
+                return '<div class="no-files">No files uploaded yet</div>';
+            }
+
+            return files.map((file, fileIndex) => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-icon">${getFileIcon(file.name)}</div>
+                        <div class="file-details">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${formatFileSize(file.size)} • Uploaded ${new Date(file.uploadDate).toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="view-btn" onclick="viewFile(${chapterIndex}, '${field}', ${fileIndex})">View</button>
+                        <button class="remove-file-btn" onclick="removeFile(${chapterIndex}, '${field}', ${fileIndex})">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewFile(chapterIndex, field, fileIndex) {
+            const dataPath = getDataPath();
+            const file = dataPath.chapters[chapterIndex][field][fileIndex];
+            
+            const modal = document.getElementById('fileModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = file.name;
+            
+            const fileType = file.type;
+            
+            if (fileType.startsWith('image/')) {
+                modalBody.innerHTML = `<img src="${file.data}" alt="${file.name}">`;
+            } else if (fileType.startsWith('video/')) {
+                modalBody.innerHTML = `<video controls><source src="${file.data}" type="${fileType}"></video>`;
+            } else if (fileType.startsWith('audio/')) {
+                modalBody.innerHTML = `<audio controls style="width: 100%;"><source src="${file.data}" type="${fileType}"></audio>`;
+            } else if (fileType === 'application/pdf') {
+                modalBody.innerHTML = `<iframe src="${file.data}" type="application/pdf"></iframe>`;
+            } else if (fileType.includes('text')) {
+                fetch(file.data)
+                    .then(res => res.text())
+                    .then(text => {
+                        modalBody.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace;">${text}</pre>`;
+                    });
+            } else {
+                modalBody.innerHTML = `
+                    <div style="text-align: center; padding: 50px;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">${getFileIcon(file.name)}</div>
+                        <h3>${file.name}</h3>
+                        <p>File type: ${file.type || 'Unknown'}</p>
+                        <p>Size: ${formatFileSize(file.size)}</p>
+                        <a href="${file.data}" download="${file.name}" class="download-link">Download File</a>
+                    </div>
+                `;
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('fileModal').style.display = 'none';
+        }
+
+        function removeFile(chapterIndex, field, fileIndex) {
+            if (confirm('Are you sure you want to remove this file?')) {
+                const dataPath = getDataPath();
+                dataPath.chapters[chapterIndex][field].splice(fileIndex, 1);
+                saveData();
+                renderChapters();
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('fileModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        function deleteChapter(event, index) {
+            event.stopPropagation();
+            if (confirm('Are you sure you want to delete this chapter?')) {
+                const dataPath = getDataPath();
+                dataPath.chapters.splice(index, 1);
+                saveData();
+                renderChapters();
+            }
+        }
+
+        function backToSubjects() {
+            currentSubject = null;
+            currentSSTSection = null;
+            document.getElementById('subjectsView').style.display = 'block';
+            document.getElementById('chaptersView').style.display = 'none';
+            document.getElementById('sstSectionsView').style.display = 'none';
+            document.getElementById('subjectsGrid').style.display = 'grid';
+        }
+
+        function goBack() {
+            currentClass = null;
+            currentSubject = null;
+            currentSSTSection = null;
+            document.getElementById('subjectsView').style.display = 'none';
+            document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        // Load data when page loads
+        loadData();
+    </script>
+</body>
+</html>
