@@ -721,6 +721,37 @@
             class10: {}
         };
 
+        // Load data from cloud storage on page load
+        async function loadData() {
+            try {
+                const result = await window.storage.get('educationData', true);
+                if (result && result.value) {
+                    data = JSON.parse(result.value);
+                }
+            } catch (error) {
+                console.log('No existing data found, starting fresh');
+            }
+        }
+
+        // Save data to cloud storage (shared across all devices)
+        async function saveData() {
+            try {
+                await window.storage.set('educationData', JSON.stringify(data), true);
+                showSaveIndicator();
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert('Error saving data. Please try again.');
+            }
+        }
+
+        function showSaveIndicator() {
+            const indicator = document.getElementById('saveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
         function selectMode(mode) {
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
@@ -1038,7 +1069,7 @@
 
             for (let file of files) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = async function(e) {
                     dataPath.chapters[chapterIndex][field].push({
                         name: file.name,
                         size: file.size,
@@ -1046,7 +1077,7 @@
                         data: e.target.result,
                         uploadDate: new Date().toISOString()
                     });
-                    saveData();
+                    await saveData();
                     renderChapters();
                 };
                 reader.readAsDataURL(file);
@@ -1165,7 +1196,9 @@
         }
 
         // Load data when page loads
-        loadData();
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadData();
+        });
     </script>
 </body>
 </html>
