@@ -480,6 +480,112 @@
             background: #c82333;
         }
 
+        .admin-panel {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #667eea;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+
+        .login-container input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .admin-controls {
+            display: none;
+        }
+
+        .admin-controls.show {
+            display: block;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-left: 15px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .view-mode-badge {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
         .back-btn {
             background: #6c757d;
             color: white;
@@ -516,7 +622,27 @@
             <p>Organize your study materials efficiently</p>
         </div>
 
-        <div class="content">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="content">
+            <div class="login-container">
+                <h2>Welcome!</h2>
+                <div class="mode-selector">
+                    <button class="mode-btn active" onclick="selectMode('view')">👁️ View Resources</button>
+                    <button class="mode-btn" onclick="selectMode('admin')">🔐 Admin Login</button>
+                </div>
+                
+                <div id="adminLoginForm" style="display: none;">
+                    <input type="password" id="adminPassword" placeholder="Enter Admin Password">
+                    <button class="btn btn-primary" style="width: 100%;" onclick="adminLogin()">Login as Admin</button>
+                </div>
+                
+                <div id="viewModeButton">
+                    <button class="btn btn-primary" style="width: 100%;" onclick="enterViewMode()">Continue as Viewer</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="mainContent" style="display: none;">
             <div id="mainView">
                 <div class="class-selector">
                     <button class="class-btn" onclick="selectClass(9)">Class 9th</button>
@@ -525,6 +651,7 @@
 
                 <div id="subjectsView" style="display: none;">
                     <div class="breadcrumb">
+                        <span id="userModeIndicator"></span>
                         <strong>Current Selection:</strong> <span id="breadcrumbText"></span>
                     </div>
                     
@@ -562,15 +689,18 @@
 
                 <div id="chaptersView" style="display: none;">
                     <div class="breadcrumb">
+                        <span id="userModeIndicatorChapters"></span>
                         <strong>Current Path:</strong> <span id="chapterBreadcrumb"></span>
                     </div>
                     
                     <button class="back-btn" onclick="backToSubjects()">← Back to Subjects</button>
 
-                    <div class="add-chapter-form">
-                        <h3 style="margin-bottom: 15px;">Add New Chapter</h3>
-                        <input type="text" id="chapterName" placeholder="Enter chapter name">
-                        <button class="btn btn-primary" onclick="addChapter()">Add Chapter</button>
+                    <div class="admin-controls" id="addChapterSection">
+                        <div class="add-chapter-form">
+                            <h3 style="margin-bottom: 15px;">Add New Chapter</h3>
+                            <input type="text" id="chapterName" placeholder="Enter chapter name">
+                            <button class="btn btn-primary" onclick="addChapter()">Add Chapter</button>
+                        </div>
                     </div>
 
                     <div class="chapters-section" id="chaptersList"></div>
@@ -583,10 +713,79 @@
         let currentClass = null;
         let currentSubject = null;
         let currentSSTSection = null;
+        let isAdmin = false;
+        const ADMIN_PASSWORD = "admin123"; // Change this to your desired password
+        
         let data = {
             class9: {},
             class10: {}
         };
+
+        function selectMode(mode) {
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (mode === 'admin') {
+                document.getElementById('adminLoginForm').style.display = 'block';
+                document.getElementById('viewModeButton').style.display = 'none';
+            } else {
+                document.getElementById('adminLoginForm').style.display = 'none';
+                document.getElementById('viewModeButton').style.display = 'block';
+            }
+        }
+
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                enterMainApp();
+            } else {
+                alert('Incorrect password! Please try again.');
+                document.getElementById('adminPassword').value = '';
+            }
+        }
+
+        function enterViewMode() {
+            isAdmin = false;
+            enterMainApp();
+        }
+
+        function enterMainApp() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            updateUIForMode();
+        }
+
+        function updateUIForMode() {
+            const modeIndicator = isAdmin 
+                ? '<span class="admin-badge">👑 ADMIN MODE</span><button class="logout-btn" onclick="logout()">Logout</button>'
+                : '<span class="view-mode-badge">👁️ VIEW MODE</span>';
+            
+            document.getElementById('userModeIndicator').innerHTML = modeIndicator;
+            document.getElementById('userModeIndicatorChapters').innerHTML = modeIndicator;
+            
+            // Show/hide admin controls
+            const adminControls = document.querySelectorAll('.admin-controls');
+            adminControls.forEach(control => {
+                if (isAdmin) {
+                    control.classList.add('show');
+                } else {
+                    control.classList.remove('show');
+                }
+            });
+        }
+
+        function logout() {
+            isAdmin = false;
+            currentClass = null;
+            currentSubject = null;
+            currentSSTSection = null;
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('subjectsView').style.display = 'none';
+            document.getElementById('chaptersView').style.display = 'none';
+            document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
+        }
 
         // Load data from localStorage on page load
         function loadData() {
@@ -706,7 +905,7 @@
                 <div class="chapter-item">
                     <div class="chapter-header" onclick="toggleChapter(${index})">
                         <h3>${index + 1}. ${chapter.name}</h3>
-                        <button class="delete-btn" onclick="deleteChapter(event, ${index})">Delete</button>
+                        ${isAdmin ? `<button class="delete-btn" onclick="deleteChapter(event, ${index})">Delete</button>` : ''}
                     </div>
                     <div class="chapter-content" id="chapter-${index}">
                         <div class="content-tabs">
@@ -716,6 +915,7 @@
                         </div>
                         
                         <div class="tab-content show" id="notes-${index}">
+                            ${isAdmin ? `
                             <div class="file-upload-area" onclick="document.getElementById('file-notes-${index}').click()">
                                 <div class="upload-icon">📁</div>
                                 <h3>Click to Upload Notes Files</h3>
@@ -723,12 +923,14 @@
                                 <input type="file" id="file-notes-${index}" multiple 
                                     onchange="handleFileUpload(event, ${index}, 'notes')">
                             </div>
+                            ` : ''}
                             <div class="uploaded-files" id="files-notes-${index}">
                                 ${renderFiles(chapter.notes, index, 'notes')}
                             </div>
                         </div>
                         
                         <div class="tab-content" id="answers-${index}">
+                            ${isAdmin ? `
                             <div class="file-upload-area" onclick="document.getElementById('file-answers-${index}').click()">
                                 <div class="upload-icon">📁</div>
                                 <h3>Click to Upload Textbook Answer Files</h3>
@@ -736,12 +938,14 @@
                                 <input type="file" id="file-answers-${index}" multiple 
                                     onchange="handleFileUpload(event, ${index}, 'textbookAnswers')">
                             </div>
+                            ` : ''}
                             <div class="uploaded-files" id="files-answers-${index}">
                                 ${renderFiles(chapter.textbookAnswers, index, 'textbookAnswers')}
                             </div>
                         </div>
                         
                         <div class="tab-content" id="practice-${index}">
+                            ${isAdmin ? `
                             <div class="file-upload-area" onclick="document.getElementById('file-practice-${index}').click()">
                                 <div class="upload-icon">📁</div>
                                 <h3>Click to Upload Practice Problem Files</h3>
@@ -749,6 +953,7 @@
                                 <input type="file" id="file-practice-${index}" multiple 
                                     onchange="handleFileUpload(event, ${index}, 'practiceProblems')">
                             </div>
+                            ` : ''}
                             <div class="uploaded-files" id="files-practice-${index}">
                                 ${renderFiles(chapter.practiceProblems, index, 'practiceProblems')}
                             </div>
@@ -864,7 +1069,7 @@
                     </div>
                     <div class="file-actions">
                         <button class="view-btn" onclick="viewFile(${chapterIndex}, '${field}', ${fileIndex})">View</button>
-                        <button class="remove-file-btn" onclick="removeFile(${chapterIndex}, '${field}', ${fileIndex})">Remove</button>
+                        ${isAdmin ? `<button class="remove-file-btn" onclick="removeFile(${chapterIndex}, '${field}', ${fileIndex})">Remove</button>` : ''}
                     </div>
                 </div>
             `).join('');
